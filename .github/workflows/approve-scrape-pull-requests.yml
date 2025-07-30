@@ -23,8 +23,11 @@ jobs:
       - name: Fetch current
         run: git fetch origin ${{ github.head_ref }}
 
+      - name: branch
+        run: git branch
+
       - name: Diff head
-        run: git diff ${{ github.head_ref }}
+        run: git diff HEAD
 
       - name: Diff base
         run: git diff ${{ github.base_ref }}
@@ -32,7 +35,7 @@ jobs:
       - name: Check changed files
         id: changes
         run: |
-          files=$(git diff --name-only ${{ github.base_ref }}...${{ github.head_ref }})
+          files=$(git diff --name-only ${{ github.base_ref }}...HEAD
           echo "$files"
           echo "$files" | grep -vE '^Scrapes/' && echo "non-scrapes-changes=true" >> $GITHUB_OUTPUT || echo "non-scrapes-changes=false" >> $GITHUB_OUTPUT
 
