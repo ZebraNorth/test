@@ -23,6 +23,12 @@ jobs:
       - name: Fetch current
         run: git fetch origin ${{ github.head_ref }}
 
+      - name: Diff head
+        run: git diff ${{ github.head_ref }}
+
+      - name: Diff base
+        run: git diff ${{ github.base_ref }}
+
       - name: Check changed files
         id: changes
         run: |
