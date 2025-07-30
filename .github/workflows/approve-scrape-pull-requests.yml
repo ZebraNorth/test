@@ -30,7 +30,7 @@ jobs:
         run: git diff HEAD
 
       - name: Diff base
-        run: git diff ${{ github.base_ref }}
+        run: git diff origin/${{ github.base_ref }}
 
       - name: Check changed files
         id: changes
