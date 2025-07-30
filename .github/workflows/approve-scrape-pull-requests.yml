@@ -14,11 +14,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch base branch
+        run: git fetch origin ${{ github.base_ref }}
+
+      - name: Fetch current
+        run: git fetch origin ${{ github.head_ref }}
+
+      - name: branch
+        run: git branch
+
+      - name: Diff head
+        run: git diff HEAD
+
+      - name: Diff base
+        run: git diff origin/${{ github.base_ref }}
 
       - name: Check changed files
         id: changes
         run: |
-          files=$(git diff --name-only ${{ github.base_ref }}...HEAD)
+          files=$(git diff --name-only origin/${{ github.base_ref }}...HEAD)
           echo "$files"
           echo "$files" | grep -vE '^Scrapes/' && echo "non-scrapes-changes=true" >> $GITHUB_OUTPUT || echo "non-scrapes-changes=false" >> $GITHUB_OUTPUT
 
