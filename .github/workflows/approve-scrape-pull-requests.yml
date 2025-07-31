@@ -1,22 +1,49 @@
 # Automatically approve pull requests for files in the Scrapes directory.
+#
+# This requires that the repository has an access token stored in the "secrets".
+# To create the access token, on GitHub go to:
+#   Account -> Settings -> Developer Settings -> Personal access tokens -> Tokens (classic)
+# and generate a new token with "repo" permissions.
+# Copy the generated token, then go to:
+#   Repository -> Settings -> Secrets and variables -> Actions -> New repository secret
+# Give it the name "PAT" and paste in the token as the secret.
 
 name: Automatically approve scraper pull requests
+
+# Trigger this workflow when pull requests are opened or updated.
 on:
   pull_request:
     types: [opened, synchronize, reopened]
 
 jobs:
   auto-approve:
+
+    # Run on the default operating system.
     runs-on: ubuntu-latest
+
+    # Allow the workflow to read the repository files and modify the pull request.
     permissions:
-      pull-requests: write
       contents: read
+      pull-requests: write
+
+    # Perform the following steps sequentially.
     steps:
+
+      # Step 1: Clone the code from the repository.
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          # By default, only the branch associated with the pull request is cloned.
+          # We need the "main" branch as well so that we can diff against it.
+          # Setting the fetch-depth to zero ensures that all branches are fetched.
           fetch-depth: 0
 
+      # Step 2: Build a list of changed files.
+      # Run 'git diff' to find the changed files. "github.base_ref" is the branch into
+      # which the pull request will be merged. Usually this is "main".
+      # The triple-dot operator means "show all the commits in HEAD that are not in github.base_ref",
+      # Use grep to see if there are any files NOT in the Scrapes directory.
+      # Write the result to GITHUB_OUTPUT
       - name: Check changed files
         id: changes
         run: |
@@ -24,8 +51,16 @@ jobs:
           echo "$files"
           echo "$files" | grep -vE '^Scrapes/' && echo "non-scrapes-changes=true" >> $GITHUB_OUTPUT || echo "non-scrapes-changes=false" >> $GITHUB_OUTPUT
 
+      # Step 3: If there were no changes outside of the Scrapes directory then approve the pull request.
       - name: Auto approve
+        # Only run this step if there were no modified files outside of the "Scrapes" directory.
         if: steps.changes.outputs.non-scrapes-changes == 'false'
+
+        # Approve the pull request.
         run: gh pr review ${{ github.event.pull_request.number }} --approve
+
+        # Add an environment variable containing the token to use for authentication with GitHub.
         env:
+          # The default GitHub Actions token does not have permission to approve pull requests, so use
+          # a custom token defined with the repository.
           GH_TOKEN: ${{ secrets.PAT }}
