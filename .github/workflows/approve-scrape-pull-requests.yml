@@ -63,4 +63,4 @@ jobs:
         env:
           # The default GitHub Actions token does not have permission to approve pull requests, so use
           # a custom token defined with the repository.
-          GH_TOKEN: ${{ secrets.PAT }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
