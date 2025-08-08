@@ -23,7 +23,7 @@ jobs:
 
     # Allow the workflow to read the repository files and modify the pull request.
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
 
     # Perform the following steps sequentially.
